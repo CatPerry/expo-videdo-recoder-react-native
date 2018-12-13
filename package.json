@@ -1,0 +1,29 @@
+{
+  "name:": "ExpoVideoRec",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "eject": "expo eject"
+  },
+  "dependencies": {
+    "@babel/core": "^7.2.0",
+    "@expo/vector-icons": "^8.0.0",
+    "@expo/videoplayer": "^0.4.0",
+    "delay": "^4.1.0",
+    "expo": "^31.0.2",
+    "native-base": "^2.8.1",
+    "react": "16.5.0",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-31.0.0.tar.gz",
+    "react-native-gesture-handler": "^1.0.12",
+    "react-native-maps": "^0.22.1",
+    "react-native-screens": "^1.0.0-alpha.17",
+    "react-navigation": "^3.0.8",
+    "shortid": "^2.2.14"
+  },
+  "devDependencies": {
+    "babel-preset-expo": "^5.0.0"
+  },
+  "private": true
+}
