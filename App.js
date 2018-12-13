@@ -5,7 +5,8 @@ import Home from './Home';
 import MyVideos from './MyVideos';
 import VideoRecorder from './VideoRecorder';
 
-// h/t to https://github.com/ajchambeaud/video-recorder
+// Hat Tip (h/t) to Expo Camera demo https://github.com/expo/camerja/blob/master/App.js
+// and h/t to https://github.com/ajchambeaud/video-recorder
 
 class Root extends React.Component {
   state = {
