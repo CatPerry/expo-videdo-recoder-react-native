@@ -28,7 +28,7 @@ export default class Layout extends React.Component {
           <Footer>
             <FooterTab>
               <Button full>
-                <Text>Copyright 2018 @ajchambeaud</Text>
+                <Text>Copyright 2018</Text>
               </Button>
             </FooterTab>
           </Footer>
