@@ -13,7 +13,6 @@ import {
   Octicons
 } from '@expo/vector-icons';
 
-
 const endpoint = 'http://localhost:3000';
 
 const flashModeOrder = {
@@ -47,7 +46,6 @@ const wbIcons = {
   fluorescent: 'wb-iridescent',
   incandescent: 'wb-incandescent',
 };
-
 
 
 class RedirectTo extends React.Component {
@@ -88,7 +86,7 @@ export default class VideoRecorder extends React.Component {
     zoom: 0,
     autoFocus: 'on',
     whiteBalance: 'auto',
-    ratio: '16:9',
+    ratio: '4:3',
     ratios: [],
     barcodeScanning: false,
     faceDetecting: false,
@@ -110,7 +108,6 @@ export default class VideoRecorder extends React.Component {
 
   async registerRecord() {
     const { recording, duration } = this.state;
-
     if (recording) {
       await delay(1000);
       this.setState(state => ({
@@ -121,35 +118,35 @@ export default class VideoRecorder extends React.Component {
     }
   }
 
-  getRatios = async () => {
-    const ratios = await this.camera.getSupportedRatios();
-    return ratios;
-  };
+  componentDidMount() {
+    FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'video').catch(e => {
+      console.log(e, 'Directory exists');
+    });
+  }
 
-  toggleFlash = () => this.setState({ flash: flashModeOrder[this.state.flash] });
-
-
-  async startRecording() {
+  startRecording = () => {
     if (!this.camera) {
       return;
     }
-
-    await this.setState(state => ({ ...state, recording: true }));
+    this.setState(state => ({ ...state, recording: true }));
     this.registerRecord();
-    const { uri, codec = 'mp4', record } = await this.camera.recordAsync();
-    console.log(record);
-    const videoId = shortid.generate();
+    // const { codec = 'mp4', record } = this.camera.recordAsync();
+    this.camera.recordAsync({ 
+      quality: Camera.Constants.VideoQuality['1080p'],
+      // onVideoSaved: this.onVideoSaved
+    });
+    const videoId = shortid.generate();   
+  }
 
+  onVideoSaved = async video => {
     await FileSystem.makeDirectoryAsync(`${FileSystem.documentDirectory}videos/`, {
       intermediates: true
     });
-
     await FileSystem.moveAsync({
-      from: record.uri,
-      to: `${FileSystem.documentDirectory}videos/demo_${videoId}.${codec}`
+      from: video.uri,
+      to: `${FileSystem.documentDirectory}videos/demo_${videoId}.mp4`
     });
-
-    console.log(`${FileSystem.documentDirectory}videos/demo_${videoId}.${codec}`);
+    console.log(`${FileSystem.documentDirectory}videos/demo_${videoId}.mp4`);
     this.setState(state => ({ ...state, redirect: 'MyVideos' }));
   }
 
@@ -157,20 +154,66 @@ export default class VideoRecorder extends React.Component {
     if (!this.camera) {
       return;
     }
-
     await this.camera.stopRecording();
     this.setState(state => ({ ...state, recording: false, duration: 0 }));
   }
 
+  getRatios = async () => {
+    const ratios = await this.camera.getSupportedRatios();
+    return ratios;
+  };
+
+  toggleFlash = () => this.setState({ flash: flashModeOrder[this.state.flash] });
+
+  toggleView = () => this.setState({ showGallery: !this.state.showGallery, newPhotos: false });
+
+  toggleFacing = () => this.setState({ type: this.state.type === 'back' ? 'front' : 'back' });
+
+  setRatio = ratio => this.setState({ ratio });
+
+  toggleWB = () => this.setState({ whiteBalance: wbOrder[this.state.whiteBalance] });
+
+  toggleFocus = () => this.setState({ autoFocus: this.state.autoFocus === 'on' ? 'off' : 'on' });
+
+  zoomOut = () => this.setState({ zoom: this.state.zoom - 0.1 < 0 ? 0 : this.state.zoom - 0.1 });
+
+  zoomIn = () => this.setState({ zoom: this.state.zoom + 0.1 > 1 ? 1 : this.state.zoom + 0.1 });
+
+  setFocusDepth = depth => this.setState({ depth });
+
+  takePicture = () => {
+    if (this.camera) {
+      this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved });
+    }
+  };
+
   toggleRecording() {
     const { recording } = this.state;
-
     return recording ? this.stopRecording() : this.startRecording();
   }
 
-  // renderGallery() {
-  //   return <GalleryScreen onPress={this.toggleView.bind(this)} />;
+  // onPictureSaved = async photo => {
+  //   await FileSystem.moveAsync({
+  //     from: photo.uri,
+  //     to: `${FileSystem.documentDirectory}photos/${Date.now()}.jpg`,
+  //   });
+  //   this.setState({ newPhotos: true });
   // }
+
+  collectPictureSizes = async () => {
+    if (this.camera) {
+      const pictureSizes = await this.camera.getAvailablePictureSizesAsync(this.state.ratio);
+      let pictureSizeId = 0;
+      if (Platform.OS === 'ios') {
+        pictureSizeId = pictureSizes.indexOf('High');
+      } else {
+        // returned array is sorted in ascending order - default size is the largest one
+        pictureSizeId = pictureSizes.length - 1;
+      }
+      this.setState({ pictureSizes, pictureSizeId, pictureSize: pictureSizes[pictureSizeId] });
+    }
+  };
+
 
   renderTopBar = () =>
     <View
